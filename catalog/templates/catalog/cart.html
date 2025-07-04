@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Корзина{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Ваша корзина</h2>
+    {% if items %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Фото</th>
+                    <th>Товар</th>
+                    <th>Количество</th>
+                    <th>Цена за шт.</th>
+                    <th>Сумма</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.image.url }}" alt="{{ item.product.name }}" 
+                                 style="width: 50px; height: 50px; object-fit: cover;" class="img-thumbnail">
+                        {% else %}
+                            <div style="width: 50px; height: 50px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; border: 1px solid #dee2e6;">
+                                <small class="text-muted">Нет фото</small>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>{{ item.product.name }}</td>
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary cart-quantity-btn" 
+                                    data-action="decrease" 
+                                    data-product-id="{{ item.product.id }}"
+                                    data-url="{% url 'cart_decrease' item.product.id %}">-</button>
+                            <span class="mx-2 quantity-display">{{ item.quantity }}</span>
+                            <button class="btn btn-sm btn-outline-secondary cart-quantity-btn" 
+                                    data-action="increase" 
+                                    data-product-id="{{ item.product.id }}"
+                                    data-url="{% url 'cart_increase' item.product.id %}">+</button>
+                        </div>
+                    </td>
+                    <td>{{ item.product.price|floatformat:2 }} ₽</td>
+                    <td class="total-price-display">{{ item.total_price|floatformat:2 }} ₽</td>
+                    <td>
+                        <form method="post" action="{% url 'cart_remove' item.product.id %}" style="display:inline;" class="cart-remove-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-danger btn-sm" title="Удалить">&times;</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-right"><strong>Общая сумма:</strong></td>
+                    <td><strong class="cart-total">{{ total_cart_price|floatformat:2 }} ₽</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    {% else %}
+        <p>Ваша корзина пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'catalog/cart_remove.js' %}"></script>
+<script src="{% static 'catalog/cart_quantity.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6">
+                {% if product.image and product.image.image %}
+                    <!-- <img src="{{ product.image.url }}" class="img-fluid rounded" alt="{{ product.name }}" width="500" height="auto">-->
+                    <img src="{{ product.image.image.url }}" class="img-fluid rounded" alt="{{ product.name }}">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h2>{{ product.name }}</h2>
+                {% if request.user.is_authenticated %}
+                    <p><strong>Цена:</strong> {{ product.price }} ₽</p>
+                {% else %}
+                    <p><strong>Для просмотра цены надо <a href="/login/">авторизоваться</a></strong></p>
+                {% endif %}
+                <p><strong>Остаток:</strong> {{ product.stock }} шт.</p>
+                <p><strong>Код:</strong> {{ product.external_id }}</p>
+                {% if product.categories.all %}
+                    <p><strong>Категории:</strong>
+                        {% for category in product.categories.all %}
+                            <span class="badge bg-secondary me-1">{{ category.name }}</span>
+                        {% endfor %}
+                    </p>
+                {% endif %}
+                <form method="post" action="{% url 'cart_add' product.id %}" class="mt-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100">В корзину</button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'catalog/cart.js' %}"></script>
+{% endblock %}

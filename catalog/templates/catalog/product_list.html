@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Каталог товаров{% endblock %}
+
+{% block content %}
+    <h1 class="mb-4">Наши товары</h1>
+        <section class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for product in page_obj %}
+            <article class="col">
+                <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">
+                    <div class="card h-100">
+                        {% if product.image and product.image.image %}
+                            <img src="{{ product.image.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            {% if request.user.is_authenticated %}
+                            <p class="card-text">Цена: <strong>{{ product.price }} ₽</strong></p>
+                            {% else %}
+                                <p class="card-text">Для просмотра цены надо <a href="/login/">авторизоваться</a></p>
+                            {% endif %}
+                            <p class="card-text">Остаток: {{ product.stock }}</p>
+                            <p class="card-text">Код 1С: {{ product.external_id }}</p>
+                            {% if product.categories.all %}
+                                <p class="card-text">Категории:
+                                    {% for category in product.categories.all %}
+                                        <span class="badge bg-secondary">{{ category.name }}</span>
+                                    {% endfor %}
+                                </p>
+                            {% endif %}
+                            <form method="post" action="{% url 'cart_add' product.id %}" class="mt-2 add-to-cart-form">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-success w-100">В корзину</button>
+                            </form>
+                        </div>
+                    </div>
+                </a>
+            </article>
+            {% empty %}
+                <p>Нет доступных товаров.</p>
+            {% endfor %}
+        </section>
+    </main>
+
+    <nav aria-label="Навигация по страницам" class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page=1">&laquo; Первая</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a></li>
+            {% endif %}
+    
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                {% endif %}
+            {% endfor %}
+    
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a></li>
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя &raquo;</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'catalog/cart.js' %}"></script>
+{% endblock %}
