@@ -130,3 +130,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+LOGIN_URL = '/login/'
+#LOGIN_REDIRECT_URL = '/'          # Куда перенаправлять после входа
+#LOGOUT_REDIRECT_URL = '/login/'  # Куда после выхода
