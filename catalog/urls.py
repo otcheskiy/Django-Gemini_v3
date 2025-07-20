@@ -25,4 +25,5 @@ urlpatterns = [
     path('order/create/', views.create_order, name='create_order'),
     path('order/<int:order_id>/', lambda request, order_id: render(request, 'catalog/order_detail.html', {'order_id': order_id}), name='order_detail'),
     path('api/v1/my-orders/', MyOrdersAPIView.as_view(), name='my_orders_api'),
+    path('products/<slug:product_slug>/', views.product_detail, name='product_detail'),
 ]
