@@ -12,6 +12,8 @@ router.register(r'images', views.ProductImageViewSet, basename='productimage')
 
 urlpatterns = [
     path('api/v1/', include(router.urls)),
+    path('api/v1/products-list/', views.ProductListAPIView.as_view(), name='product_list_api'),
+    path('api/v1/filters/', views.FiltersAPIView.as_view(), name='filters_api'),
     path('login/', views.login_view, name='login'),
     path('register/', views.register, name='register'),
     path('logout/', views.logout_view, name='logout'),

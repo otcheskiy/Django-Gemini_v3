@@ -18,13 +18,51 @@ class ProductImage(models.Model):
         return self.image.name.split('/')[-1] if self.image else "No Image"
 
 class Product(models.Model):
+    BRAND_CHOICES = [
+        ("Luceat", "Luceat"),
+        ("Cormens", "Cormens"),
+        ("MonSolis", "MonSolis"),
+        ("Piccolo Pesce", "Piccolo Pesce"),
+    ]
+    MATERIAL_CHOICES = [
+        ("металл", "металл"),
+        ("пластик", "пластик"),
+        ("комбинированные", "комбинированные"),
+        ("титан", "титан"),
+    ]
+    GENDER_CHOICES = [
+        ("мужские", "мужские"),
+        ("женские", "женские"),
+        ("унисекс", "унисекс"),
+    ]
+    AGE_CHOICES = [
+        ("детские", "детские"),
+        ("подростковые", "подростковые"),
+    ]
+    COLOR_CHOICES = [
+        ("черный", "черный"),
+        ("серебро", "серебро"),
+        ("золото", "золото"),
+        ("цветные", "цветные"),
+    ]
+
     name = models.CharField(max_length=255)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.IntegerField()
     external_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
     image = models.ForeignKey(ProductImage, null=True, blank=True, on_delete=models.SET_NULL)
-    categories = models.ManyToManyField(Category)
+    # categories = models.ManyToManyField(Category)
     slug = models.SlugField(unique=True, max_length=255)
+
+    brand = models.CharField(max_length=32, choices=BRAND_CHOICES, blank=True, null=True)
+    material = models.CharField(max_length=32, choices=MATERIAL_CHOICES, blank=True, null=True)
+    gender = models.CharField(max_length=16, choices=GENDER_CHOICES, blank=True, null=True)
+    age = models.CharField(max_length=16, choices=AGE_CHOICES, blank=True, null=True)
+    color = models.CharField(max_length=16, choices=COLOR_CHOICES, blank=True, null=True)
+    temple_size = models.IntegerField(blank=True, null=True)
+    lens_width = models.IntegerField(blank=True, null=True)
+    bridge_width = models.IntegerField(blank=True, null=True)
+    category = models.ForeignKey(Category, related_name="products", on_delete=models.CASCADE, blank=True, null=True)
 
     def __str__(self):
         return self.name

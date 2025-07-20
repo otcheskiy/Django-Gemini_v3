@@ -1,8 +1,10 @@
 from django.contrib import admin
 from .models import Category, Product, ProductImage
 
+@admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'price', 'stock', 'external_id_display', 'image_preview']
+    list_display = ('name', 'category', 'brand', 'external_id', 'material', 'gender', 'price', 'stock', 'image_preview')
+    list_filter = ('category', 'brand', 'material', 'gender')
     readonly_fields = ['image_preview']
 
     def image_preview(self, obj):
@@ -16,6 +18,10 @@ class ProductAdmin(admin.ModelAdmin):
         return obj.external_id
     external_id_display.short_description = "Код 1С"
 
-admin.site.register(Product, ProductAdmin)
-admin.site.register(Category)
-admin.site.register(ProductImage)
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+    list_display = ('image', 'uploaded_at')

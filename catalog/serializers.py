@@ -13,7 +13,6 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image', 'uploaded_at']
 
 class ProductSerializer(serializers.ModelSerializer):
-    #categories = CategorySerializer(many=True, read_only=True)
     external_id = serializers.CharField(
         required=True,
         allow_blank=False,
@@ -24,10 +23,17 @@ class ProductSerializer(serializers.ModelSerializer):
     )
     image = serializers.PrimaryKeyRelatedField(queryset=ProductImage.objects.all(), required=False, allow_null=True)
     image_url = serializers.SerializerMethodField()
+    category_id = serializers.PrimaryKeyRelatedField(source='category', queryset=Category.objects.all(), required=False, allow_null=True)
+    category_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
-        fields = ['id', 'name', 'price', 'stock', 'external_id', 'image', 'image_url', 'categories']
+        fields = [
+            'id', 'name', 'price', 'stock', 'external_id', 'image', 'image_url',
+            'brand', 'material', 'gender', 'age', 'color',
+            'temple_size', 'lens_width', 'bridge_width',
+            'category_id', 'category_name', 'slug'
+        ]
 
     def get_image_url(self, obj):
         if obj.image and obj.image.image:
@@ -37,6 +43,9 @@ class ProductSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(url)
             return url
         return None
+
+    def get_category_name(self, obj):
+        return obj.category.name if obj.category else None
 
     def create(self, validated_data):
         categories = validated_data.pop('categories', [])

@@ -5,44 +5,116 @@
 
 {% block content %}
     <h1 class="mb-4">Наши товары</h1>
-        <section class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-            {% for product in page_obj %}
-            <article class="col">
-                <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">
-                    <div class="card h-100">
-                        {% if product.image and product.image.image %}
-                            <img src="{{ product.image.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ product.name }}</h5>
-                            {% if request.user.is_authenticated %}
-                            <p class="card-text">Цена: <strong>{{ product.price }} ₽</strong></p>
-                            {% else %}
-                                <p class="card-text">Для просмотра цены надо <a href="/login/">авторизоваться</a></p>
-                            {% endif %}
-                            <p class="card-text">Остаток: {{ product.stock }}</p>
-                            <p class="card-text">Код 1С: {{ product.external_id }}</p>
-                            {% if product.categories.all %}
-                                <p class="card-text">Категории:
-                                    {% for category in product.categories.all %}
-                                        <span class="badge bg-secondary">{{ category.name }}</span>
-                                    {% endfor %}
-                                </p>
-                            {% endif %}
-                            <form method="post" action="{% url 'cart_add' product.id %}" class="mt-2 add-to-cart-form">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-success w-100">В корзину</button>
-                            </form>
+    <div class="row mb-4">
+        <form id="filters-form" class="col-12 col-md-3 mb-3 mb-md-0">
+            <div class="card p-3">
+                <h5>Фильтры</h5>
+                <div class="mb-2">
+                    <strong>Категория</strong><br>
+                    {% for category in categories %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="category" value="{{ category.name }}" id="cat{{ category.id }}">
+                            <label class="form-check-label" for="cat{{ category.id }}">{{ category.name }}</label>
                         </div>
-                    </div>
-                </a>
-            </article>
-            {% empty %}
-                <p>Нет доступных товаров.</p>
-            {% endfor %}
-        </section>
-    </main>
-
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Бренд</strong><br>
+                    {% for val, label in brand_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="brand" value="{{ val }}" id="brand{{ forloop.counter }}">
+                            <label class="form-check-label" for="brand{{ forloop.counter }}">{{ label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Материал</strong><br>
+                    {% for val, label in material_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="material" value="{{ val }}" id="material{{ forloop.counter }}">
+                            <label class="form-check-label" for="material{{ forloop.counter }}">{{ label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Пол</strong><br>
+                    {% for val, label in gender_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="gender" value="{{ val }}" id="gender{{ forloop.counter }}">
+                            <label class="form-check-label" for="gender{{ forloop.counter }}">{{ label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Возраст</strong><br>
+                    {% for val, label in age_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="age" value="{{ val }}" id="age{{ forloop.counter }}">
+                            <label class="form-check-label" for="age{{ forloop.counter }}">{{ label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Цвет</strong><br>
+                    {% for val, label in color_choices %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="color" value="{{ val }}" id="color{{ forloop.counter }}">
+                            <label class="form-check-label" for="color{{ forloop.counter }}">{{ label }}</label>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="mb-2">
+                    <strong>Длина заушника (temple_size)</strong><br>
+                    <input type="number" class="form-control mb-1" name="temple_size_min" placeholder="Мин">
+                    <input type="number" class="form-control" name="temple_size_max" placeholder="Макс">
+                </div>
+                <div class="mb-2">
+                    <strong>Ширина линзы (lens_width)</strong><br>
+                    <input type="number" class="form-control mb-1" name="lens_width_min" placeholder="Мин">
+                    <input type="number" class="form-control" name="lens_width_max" placeholder="Макс">
+                </div>
+                <div class="mb-2">
+                    <strong>Ширина мостика (bridge_width)</strong><br>
+                    <input type="number" class="form-control mb-1" name="bridge_width_min" placeholder="Мин">
+                    <input type="number" class="form-control" name="bridge_width_max" placeholder="Макс">
+                </div>
+                <button type="submit" class="btn btn-primary mt-2 w-100">Показать</button>
+            </div>
+        </form>
+        <div class="col-12 col-md-9">
+            <div id="product-list">
+                <section class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {% for product in page_obj %}
+                    <article class="col">
+                        <a href="{% url 'product_detail' product.slug %}" class="text-decoration-none text-dark">
+                            <div class="card h-100">
+                                {% if product.image and product.image.image %}
+                                    <img src="{{ product.image.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ product.name }}</h5>
+                                    {% if request.user.is_authenticated %}
+                                    <p class="card-text">Цена: <strong>{{ product.price }} ₽</strong></p>
+                                    {% else %}
+                                        <p class="card-text">Для просмотра цены надо <a href="/login/">авторизоваться</a></p>
+                                    {% endif %}
+                                    <p class="card-text">Остаток: {{ product.stock }}</p>
+                                    <p class="card-text">Код 1С: {{ product.external_id }}</p>
+                                    <form method="post" action="{% url 'cart_add' product.id %}" class="mt-2 add-to-cart-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-success w-100">В корзину</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </a>
+                    </article>
+                    {% empty %}
+                        <p>Нет доступных товаров.</p>
+                    {% endfor %}
+                </section>
+            </div>
+        </div>
+    </div>
     <nav aria-label="Навигация по страницам" class="mt-4">
         <ul class="pagination justify-content-center">
             {% if page_obj.has_previous %}
@@ -64,9 +136,9 @@
             {% endif %}
         </ul>
     </nav>
-
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'catalog/cart.js' %}"></script>
+<script src="{% static 'catalog/filters.js' %}"></script>
 {% endblock %}
